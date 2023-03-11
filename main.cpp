@@ -76,12 +76,22 @@ void free_table(hash_table* table) {
 }
 
 
+
+
 int main() {
     printf("Calculated index for value 'Test': %i\n", hash_function((char*)"Test"));
     printf("Calculated index for value 'Tset': %i\n", hash_function((char*)"Tset"));
 
     hash_table* table = create_table(CAPACITY);
     std::cout << table;
+    std::cout << "Hash table contents:\n";
+    std::cout << "Index        Key        Value\n";
+    for (int i = 0; i < table -> size; i++) {
+        if (table -> items[i]) {
+            printf("%d         %s        %s", i, table -> items[i] -> key, table -> items[i] -> value);
+        }
+    }
+    
     free_table(table);
     return 0;
 }
