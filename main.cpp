@@ -75,7 +75,25 @@ void free_table(hash_table* table) {
     free(table);
 }
 
+//Insert function
+void insert_value(hash_table* table, char* key, char* value) {
+    //Init item
+    hash_item* item = create_item(key, value);
 
+    //Get the index
+    int index = hash_function(key);  
+
+    hash_item* table_item = table -> items[index];
+    if (!table_item) {
+        //Table item is empty, setting a value
+        table -> items[index] = item;
+        table -> count += 1;
+    } else {
+        //Naive approach - oversetting value
+        table -> items[index] = item;
+        table -> count += 1;
+    }
+}
 
 
 int main() {
@@ -83,12 +101,14 @@ int main() {
     printf("Calculated index for value 'Tset': %i\n", hash_function((char*)"Tset"));
 
     hash_table* table = create_table(CAPACITY);
-    std::cout << table;
+    insert_value(table, (char*)"Test", (char*)"Test");
+    insert_value(table, (char*)"Tset", (char*)"Different value with the same key value");
+    insert_value(table, (char*)"10", (char*)"Another value");
     std::cout << "Hash table contents:\n";
     std::cout << "Index        Key        Value\n";
     for (int i = 0; i < table -> size; i++) {
         if (table -> items[i]) {
-            printf("%d         %s        %s", i, table -> items[i] -> key, table -> items[i] -> value);
+            printf("%d         %s        %s\n", i, table -> items[i] -> key, table -> items[i] -> value);
         }
     }
     
