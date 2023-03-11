@@ -55,8 +55,33 @@ hash_table* create_table(int size) {
     return table;
 }
 
+//Methods to free memory
+void free_item(hash_item* item) {
+    free(item -> key);
+    free(item -> value);
+    free(item);
+}
+
+void free_table(hash_table* table) {
+    for (int i = 0; i < table -> size; i++) {
+        hash_item* item = table -> items[i];
+        //Segmentation fault if trying to free on NULL item
+        if (item) {
+            free_item(item);
+        }
+    }
+
+    free(table -> items);
+    free(table);
+}
+
+
 int main() {
     printf("Calculated index for value 'Test': %i\n", hash_function((char*)"Test"));
     printf("Calculated index for value 'Tset': %i\n", hash_function((char*)"Tset"));
+
+    hash_table* table = create_table(CAPACITY);
+    std::cout << table;
+    free_table(table);
     return 0;
 }
