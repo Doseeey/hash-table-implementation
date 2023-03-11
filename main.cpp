@@ -52,6 +52,7 @@ hash_table* create_table(int size) {
         table -> items[i] = NULL;
     }
 
+    return table;
 }
 
 int main() {
