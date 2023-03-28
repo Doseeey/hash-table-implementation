@@ -87,17 +87,7 @@ void free_item(hash_item* item) {
 }
 
 void free_list(bucket_list* list) {
-    // bucket_list* temp = list;
-
-    // while (list) {
-    //     temp = list;
-    //     free(temp -> item -> key);
-    //     free(temp -> item -> value);
-    //     free(temp -> item);
-    //     free(temp);
-    //     list = list -> next;
-    // }
-
+    delete[] list;
 }
 
 void free_bucket(hash_table* table) {
@@ -190,32 +180,94 @@ void insert_value(hash_table* table, char* key, char* value) {
     }
 }
 
+void delete_value(hash_table* table, char* key)
+{
+    int index = hash_function(key);
+    hash_item* item = table->items[index];
+    bucket_list* head = table->bucket[index];
+
+    if (item == NULL)
+    {
+        return;
+    }
+    else {
+        if (head == NULL && strcmp(item->key, key) == 0)
+        {
+            // Collision chain does not exist.
+            table->items[index] = NULL;
+            free_item(item);
+            table->count--;
+            return;
+        }
+        else if (head != NULL)
+        {
+            // Collision chain exists.
+            if (strcmp(item->key, key) == 0)
+            {
+                // Set the head of the list as the new item.
+                free_item(item);
+                bucket_list* node = head;
+                head = head->next;
+                node->next = NULL;
+                table->items[index] = create_item(node->item->key, node->item->value);
+                free_list(node);
+                table->bucket[index] = head;
+                return;
+            }
+
+            bucket_list* curr = head;
+            bucket_list* prev = NULL;
+            //Go through bucket
+            while (curr)
+            {
+                if (strcmp(curr->item->key, key) == 0)
+                {
+                    if (prev == NULL)
+                    {
+                        free_list(head);
+                        table->bucket[index] = NULL;
+                        return;
+                    }
+                    else
+                    {
+                        prev->next = curr->next;
+                        curr->next = NULL;
+                        free_list(curr);
+                        table->bucket[index] = head;
+                        return;
+                    }
+                }
+
+                curr = curr->next;
+                prev = curr;
+            }
+        }
+    }
+}
+
+
+void print_table(hash_table* table)
+{
+    printf("---------------\n");
+    printf("HASH TABLE\n");
+    for(int i = 0; i < table -> size; i++){
+        if(table -> items[i]){
+            // print item on items[index]
+            printf("Index %d Key %s Value %s \n", i, table -> items[i] -> key, table -> items[i] -> value);
+            // hash_item* Ptr = table -> bucket[i] -> item;
+            bucket_list* Bucket = table -> bucket[i];
+            // print other items in bucket if exist
+            while(Bucket){
+                printf("Index %d Key %s Value %s \n", i, Bucket -> item -> key, Bucket -> item -> value);
+                Bucket = Bucket -> next;
+            }
+        }
+    }
+    printf("---------------\n");
+}
 
 int main() {
-    // printf("Calculated index for value '10': %i\n", hash_function((char*)"10"));
-    // printf("Calculated index for value '01': %i\n", hash_function((char*)"01"));
-
-    // hash_table* table = create_table(CAPACITY);
-    // insert_value(table, (char*)"1", (char*)"Some address");
-    // insert_value(table, (char*)"2", (char*)"Another address");
-    // insert_value(table, (char*)"10", (char*)"Address");
-    // insert_value(table, (char*)"01", (char*)"Collision with the same hash index!");
-    // std::cout << "Hash table contents:\n";
-    // std::cout << "Index        Key        Value\n";
-    // for (int i = 0; i < table -> size; i++) {
-    //     if (table -> items[i]) {
-    //         printf("%d         %s        %s\n", i, table -> items[i] -> key, table -> items[i] -> value);
-    //     }
-    // }
-    
-    // free_table(table);
-
     hash_table* small_table = create_table(CAPACITY);
-    char values[11] = "abcdefghij";
-
-    // for (int i = 0; i < CAPACITY; i++) {
-    //     insert_value(small_table, (char*)values[i], (char*)"Initial Address");
-    // }
 
     insert_value(small_table, (char*)"a", (char*)"Initial Address");
     insert_value(small_table, (char*)"b", (char*)"Initial Address");
@@ -228,30 +280,35 @@ int main() {
     insert_value(small_table, (char*)"i", (char*)"Initial Address");
     insert_value(small_table, (char*)"j", (char*)"Initial Address");
 
-    std::cout << "Hash table contents:\n";
-    std::cout << "Index        Key        Value\n";
-    for (int i = 0; i < small_table -> size; i++) {
-        if (small_table -> items[i]) {
-            printf("%d         %s        %s        %s\n", i, small_table -> items[i] -> key, small_table -> items[i] -> value, small_table -> bucket[i]);
-        }
-    }
+
+    print_table(small_table);
 
     insert_value(small_table, (char*)"d", (char*)"Collision Address");
     insert_value(small_table, (char*)"e", (char*)"Collision Address");
     insert_value(small_table, (char*)"f", (char*)"Collision Address");
     insert_value(small_table, (char*)"g", (char*)"Collision Address");
 
-    std::cout << "Hash table contents:\n";
-    std::cout << "Index        Key        Value\n";
-    for (int i = 0; i < small_table -> size; i++) {
-        if (small_table -> items[i]) {
-            if (small_table -> bucket[i]) {
-                printf("%d         %s        %s   ->     %s\n", i, small_table -> items[i] -> key, small_table -> items[i] -> value, small_table -> bucket[i] -> item -> value);
-            } else {
-                printf("%d         %s        %s        %s\n", i, small_table -> items[i] -> key, small_table -> items[i] -> value, small_table -> bucket[i]);
-            }
-        }
-    }
+
+    // std::cout << "Hash table contents:\n";
+    // std::cout << "Index        Key        Value\n";
+    // for (int i = 0; i < small_table -> size; i++) {
+    //     if (small_table -> items[i]) {
+    //         if (small_table -> bucket[i]) {
+    //             printf("%d         %s        %s   ->     %s\n", i, small_table -> items[i] -> key, small_table -> items[i] -> value, small_table -> bucket[i] -> item -> value);
+    //         } else {
+    //             printf("%d         %s        %s        %s\n", i, small_table -> items[i] -> key, small_table -> items[i] -> value, small_table -> bucket[i]);
+    //         }
+    //     }
+    // }
+
+    print_table(small_table);
+
+    delete_value(small_table, (char*)"d");
+    delete_value(small_table, (char*)"e");
+    delete_value(small_table, (char*)"f");
+    delete_value(small_table, (char*)"g");
+
+    print_table(small_table);
 
     free_table(small_table);
 
