@@ -269,6 +269,7 @@ void print_table(hash_table* table)
 int main() {
     hash_table* small_table = create_table(CAPACITY);
 
+    //Fill the table with initial values for all indexes
     insert_value(small_table, (char*)"a", (char*)"Initial Address");
     insert_value(small_table, (char*)"b", (char*)"Initial Address");
     insert_value(small_table, (char*)"c", (char*)"Initial Address");
@@ -280,9 +281,9 @@ int main() {
     insert_value(small_table, (char*)"i", (char*)"Initial Address");
     insert_value(small_table, (char*)"j", (char*)"Initial Address");
 
-
     print_table(small_table);
 
+    //Add collisions to some addresses
     insert_value(small_table, (char*)"d", (char*)"Collision Address");
     insert_value(small_table, (char*)"e", (char*)"Collision Address");
     insert_value(small_table, (char*)"f", (char*)"Collision Address");
@@ -303,6 +304,7 @@ int main() {
 
     print_table(small_table);
 
+    //Remove some initial addresses
     delete_value(small_table, (char*)"d");
     delete_value(small_table, (char*)"e");
     delete_value(small_table, (char*)"f");
@@ -310,6 +312,13 @@ int main() {
 
     print_table(small_table);
 
+    //Remove some collision addresses
+    delete_value(small_table, (char*)"d");
+    delete_value(small_table, (char*)"e");
+
+    print_table(small_table);
+
+    //Clean memory
     free_table(small_table);
 
     //Minimal steps: O(1)
